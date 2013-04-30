@@ -59,9 +59,7 @@ end
 
 # -- Fetch'n'Format messages
 
-
 since_id = REDIS.get("flowdock-digest:since_id") || first_message_id
-
 
 formatted_messages = []
 
@@ -70,6 +68,7 @@ while true do
 
   message_response = HTTParty.get(messages,
     :basic_auth => auth)
+
 
   break if message_response.parsed_response.size == 0
 
@@ -80,15 +79,16 @@ while true do
     user = if user_id == 0
       "Flowdock"
     else
-      users_hash[user_id]["nick"]
+      users_hash[user_id]
     end
 
     content = message["content"]
 
-    formatted_messages << "#{user}: #{content}"
+    formatted_messages << "<pre>#{user}: #{content}</pre>"
 
     since_id = message["id"]
   end
+
 
 end
 
@@ -102,7 +102,7 @@ end
 
 # -- Send mail if messages
 
-mail_body = formatted_messages.join("<br>")
+mail_body = formatted_messages.join("")
 
 mail = Mail.deliver do
   to digest_recipient_address
