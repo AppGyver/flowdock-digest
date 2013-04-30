@@ -1,6 +1,6 @@
 # Flowdock Digest
 
-Sends digest emails of messages
+Sends digest emails of messages, please upvote this feature in Flowdock: http://flowdock.uservoice.com/forums/36827-general/suggestions/3658201-send-daily-email-digest-of-flow-activity
 
 ## Installation in Heroku
 
