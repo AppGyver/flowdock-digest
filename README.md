@@ -4,12 +4,19 @@ Sends digest emails of messages
 
 ## Install
 
-Has support for RVM (.ruby-version and .ruby-gemset)
+Flowdock Digest has support for RVM (.ruby-version and .ruby-gemset).
 
     $ bundle install
-
     $ foreman start
 
-## Usage in Heroku
+## Installation in Heroku
 
-TODO
+    $ heroku create <name>
+    $ git push heroku master
+
+### Scheduler
+
+    $ heroku addons:add scheduler:standard
+
+    $ heroku addons:open scheduler
+
