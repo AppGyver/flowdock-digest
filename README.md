@@ -2,9 +2,13 @@
 
 Sends digest emails of messages, please upvote this feature in Flowdock: http://flowdock.uservoice.com/forums/36827-general/suggestions/3658201-send-daily-email-digest-of-flow-activity
 
+
+
 ## Installation in Heroku
 
     $ heroku create <name>
+
+    $ heroku config:add FLOWDOCK_DIGEST_FIRST_MESSAGE_ID=<flow message id to start collecting digest from>
 
     $ heroku config:set FLOWDOCK_DIGEST_PERSONAL_API_TOKEN=<API token of the user>
     $ heroku config:set FLOWDOCK_DIGEST_FLOW_API_TOKEN=<API token of the flow>

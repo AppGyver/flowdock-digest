@@ -16,6 +16,7 @@ sendgrid_username = ENV['SENDGRID_USERNAME']
 digest_recipient_address = ENV['FLOWDOCK_DIGEST_RECIPIENT_ADDRESS']
 digest_sender_address = ENV['FLOWDOCK_DIGEST_SENDER_ADDRESS']
 
+first_message_id = ENV['FLOWDOCK_DIGEST_FIRST_MESSAGE_ID']
 
 # -- Other configs
 
@@ -41,38 +42,57 @@ auth = {
 
 # -- fetch messages and users
 
-since_id = REDIS.get("flowdock-digest:since_id") || "1"
-
 users = "https://api.flowdock.com/flows/#{organization}/#{flow_name}/users"
-messages = "https://api.flowdock.com/flows/#{organization}/#{flow_name}/messages?limit=100&event=message&since_id=#{since_id}"
 
 
 user_response = HTTParty.get(users,
   :basic_auth => auth)
 
 
-@users = {}
+users_hash = {}
+
 user_response.parsed_response.each do |user|
-  @users[user["id"]] = user["nick"]
+  users_hash[user["id"]] = user["nick"]
 end
 
 
-message_response = HTTParty.get(messages,
-  :basic_auth => auth)
+
+# -- Fetch'n'Format messages
 
 
-# -- Format messages
+since_id = REDIS.get("flowdock-digest:since_id") || first_message_id
+
 
 formatted_messages = []
 
-message_response.parsed_response.each do |message|
-  user =  @users[message["user"]]
-  content =  message["content"]
+while true do
+  messages = "https://api.flowdock.com/flows/#{organization}/#{flow_name}/messages?limit=100&event=message&since_id=#{since_id}"
 
-  formatted_messages << "#{user}: #{content}"
+  message_response = HTTParty.get(messages,
+    :basic_auth => auth)
 
-  REDIS.set "flowdock-digest:since_id", message["id"]
+  break if message_response.parsed_response.size == 0
+
+  message_response.parsed_response.each do |message|
+
+    user_id = message["user"]
+
+    user = if user_id == 0
+      "Flowdock"
+    else
+      users_hash[user_id]["nick"]
+    end
+
+    content = message["content"]
+
+    formatted_messages << "#{user}: #{content}"
+
+    since_id = message["id"]
+  end
+
 end
+
+REDIS.set "flowdock-digest:since_id", since_id
 
 
 unless formatted_messages.size > 0
