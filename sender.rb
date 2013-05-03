@@ -18,6 +18,8 @@ digest_sender_address = ENV['FLOWDOCK_DIGEST_SENDER_ADDRESS']
 
 first_message_id = ENV['FLOWDOCK_DIGEST_FIRST_MESSAGE_ID']
 
+sort_by_nicks = ENV['FLOWDOCK_DIGEST_SORT_MESSAGES_BY_NICKS'] == "true"
+
 # -- Other configs
 
 REDIS = RedisProviderFreedom.current_redis
@@ -56,12 +58,14 @@ user_response.parsed_response.each do |user|
 end
 
 
+REDIS.del("flowdock-digest:since_id")
 
 # -- Fetch'n'Format messages
 
 since_id = REDIS.get("flowdock-digest:since_id") || first_message_id
 
 formatted_messages = []
+formatted_messages_by_nicks = {}
 
 while true do
   messages = "https://api.flowdock.com/flows/#{organization}/#{flow_name}/messages?limit=100&event=message&since_id=#{since_id}"
@@ -84,7 +88,14 @@ while true do
 
     content = message["content"]
 
-    formatted_messages << "<pre>#{user}: #{content}</pre>"
+    formatted_message = "<pre>#{user}: #{content}</pre>"
+
+    if sort_by_nicks
+      formatted_messages_by_nicks[user] ||= []
+      formatted_messages_by_nicks[user] << formatted_message
+    else
+      formatted_messages << formatted_message
+    end
 
     since_id = message["id"]
   end
@@ -95,12 +106,23 @@ end
 REDIS.set "flowdock-digest:since_id", since_id
 
 
-unless formatted_messages.size > 0
+unless (formatted_messages.size > 0 || formatted_messages_by_nicks.keys.size > 0 )
   puts "no messages, not sending digest"
   exit 0
 end
 
+
+
 # -- Send mail if messages
+
+if sort_by_nicks
+  formatted_messages_by_nicks.each_key do |nick|
+    formatted_messages << "<strong>#{nick}</strong>"
+    formatted_messages_by_nicks[nick].each do |msg|
+      formatted_messages << msg
+    end
+  end
+end
 
 mail_body = formatted_messages.join("")
 
