@@ -58,8 +58,6 @@ user_response.parsed_response.each do |user|
 end
 
 
-REDIS.del("flowdock-digest:since_id")
-
 # -- Fetch'n'Format messages
 
 since_id = REDIS.get("flowdock-digest:since_id") || first_message_id
