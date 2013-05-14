@@ -19,6 +19,7 @@ digest_sender_address = ENV['FLOWDOCK_DIGEST_SENDER_ADDRESS']
 first_message_id = ENV['FLOWDOCK_DIGEST_FIRST_MESSAGE_ID']
 
 sort_by_nicks = ENV['FLOWDOCK_DIGEST_SORT_MESSAGES_BY_NICKS'] == "true"
+skip_unless_tags_in_message = ENV['FLOWDOCK_DIGEST_SKIP_UNLESS_TAGS'] == "true"
 
 # -- Other configs
 
@@ -117,6 +118,8 @@ if sort_by_nicks
   formatted_messages_by_nicks.each_key do |nick|
     formatted_messages << "<strong>#{nick}</strong>"
     formatted_messages_by_nicks[nick].each do |msg|
+      next if skip_unless_tags_in_message and not msg.include?("#")
+
       formatted_messages << msg
     end
   end

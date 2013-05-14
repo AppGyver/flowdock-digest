@@ -20,6 +20,7 @@ Sends digest emails of messages, please upvote this feature in Flowdock: http://
     $ heroku config:add FLOWDOCK_DIGEST_SENDER_ADDRESS=<email@address.com>
 
     $ heroku config:add FLOWDOCK_DIGEST_SORT_MESSAGES_BY_NICKS=<"true" if messages should be grouped by nick>
+    $ heroku config:add FLOWDOCK_DIGEST_SKIP_UNLESS_TAGS=<"true" if only messages that have tags should be included in the digest>
 
     $ heroku addons:add redistoto:nano
     $ heroku config:add REDIS_PROVIDER_URL_KEY=REDISTOGO_URL
