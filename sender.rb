@@ -86,8 +86,12 @@ while true do
     end
 
     content = message["content"]
+    tags = message["tags"]
 
-    formatted_message = "<pre>#{user}: #{content}</pre>"
+    formatted_message = {
+      :content => "<pre>#{user}: #{content}</pre>",
+      :tags => tags
+    }
 
     if sort_by_nicks
       formatted_messages_by_nicks[user] ||= []
@@ -116,16 +120,23 @@ end
 
 if sort_by_nicks
   formatted_messages_by_nicks.each_key do |nick|
-    formatted_messages << "<strong>#{nick}</strong>"
+    formatted_messages << { :content => "<strong>#{nick}:</strong><br/>", :tags => [nick] }
     formatted_messages_by_nicks[nick].each do |msg|
-      next if skip_unless_tags_in_message and not msg.include?("#")
-
       formatted_messages << msg
     end
+
   end
 end
 
-mail_body = formatted_messages.join("")
+
+mail_messages = []
+
+formatted_messages.each do |msg|
+  next if skip_unless_tags_in_message and msg[:tags].empty?
+  mail_messages << msg[:content]
+end
+
+mail_body = mail_messages.join("")
 
 mail = Mail.deliver do
   to digest_recipient_address
