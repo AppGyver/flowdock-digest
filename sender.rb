@@ -79,7 +79,7 @@ while true do
 
     user_id = message["user"]
 
-    user = if user_id == 0
+    user = if user_id == "0"
       "Flowdock"
     else
       users_hash[user_id]
