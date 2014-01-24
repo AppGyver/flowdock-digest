@@ -55,7 +55,7 @@ user_response = HTTParty.get(users,
 users_hash = {}
 
 user_response.parsed_response.each do |user|
-  users_hash[user["id"]] = user["nick"]
+  users_hash[user["id"].to_s] = user["nick"]
 end
 
 
