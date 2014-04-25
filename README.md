@@ -14,7 +14,7 @@ Sends digest emails of messages, please upvote this feature in Flowdock: http://
     $ heroku config:set FLOWDOCK_DIGEST_FLOW_API_TOKEN=<API token of the flow>
 
     $ heroku config:set FLOWDOCK_DIGEST_ORGANIZATION=<name of your organization>
-    $ heroku config:set FLOWDOCK_DIGEST_FLOW=<name of your flow>
+    $ heroku config:set FLOWDOCK_DIGEST_FLOWS=[<name of your flows>]
 
     $ heroku config:add FLOWDOCK_DIGEST_RECIPIENT_ADDRESS=<email@address.com>
     $ heroku config:add FLOWDOCK_DIGEST_SENDER_ADDRESS=<email@address.com>
