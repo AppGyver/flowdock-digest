@@ -18,13 +18,9 @@ digest_sender_address = ENV['FLOWDOCK_DIGEST_SENDER_ADDRESS']
 
 first_message_id = ENV['FLOWDOCK_DIGEST_FIRST_MESSAGE_ID']
 
-sort_by_nicks = ENV['FLOWDOCK_DIGEST_SORT_MESSAGES_BY_NICKS'] == "true"
-skip_unless_tags_in_message = ENV['FLOWDOCK_DIGEST_SKIP_UNLESS_TAGS'] == "true"
-
 # -- Other configs
 
 REDIS = RedisProviderFreedom.current_redis
-
 
 Mail.defaults do
   delivery_method :smtp, { :address   => "smtp.sendgrid.net",
@@ -36,12 +32,10 @@ Mail.defaults do
                            :enable_starttls_auto => true }
 end
 
-
 auth = {
   :username => personal_api_token,
   :password => flow_api_token
 }
-
 
 # -- fetch messages and users
 
@@ -69,21 +63,16 @@ flows.each do |flow_name|
     message_response = HTTParty.get(messages,
       :basic_auth => auth)
 
-
     break if message_response.parsed_response.size == 0
 
     message_response.parsed_response.each do |message|
 
       user_id = message["user"]
 
-
       next if user_id == "0"
 
-      user = if user_id == "0"
-        "Flowdock"
-      else
-        users_hash[user_id]
-      end
+      user = users_hash[user_id]
+      users_hash[user_id]
 
       content = message["content"]
       tags = message["tags"]
@@ -139,13 +128,18 @@ formatted_messages_by_nicks.each do |user, flow|
 end
 
 mail = Mail.deliver do
+
   to digest_recipient_address
   from digest_sender_address
   subject "Flowdock Digest - #{Date.today.to_s}"
+
   html_part do
+
     content_type 'text/html; charset=UTF-8'
     body mail_body
+
   end
+
 end
 
 puts "sent digest."
