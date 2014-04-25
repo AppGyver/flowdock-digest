@@ -9,6 +9,7 @@ personal_api_token = ENV['FLOWDOCK_DIGEST_PERSONAL_API_TOKEN']
 flow_api_token = ENV['FLOWDOCK_DIGEST_FLOW_API_TOKEN']
 organization = ENV['FLOWDOCK_DIGEST_ORGANIZATION']
 flows = eval ENV['FLOWDOCK_DIGEST_FLOWS']
+skip_unless_tags_in_message = ENV['FLOWDOCK_DIGEST_SKIP_UNLESS_TAGS'] == "true"
 
 sendgrid_password = ENV['SENDGRID_PASSWORD']
 sendgrid_username = ENV['SENDGRID_USERNAME']
@@ -55,7 +56,7 @@ flows.each do |flow_name|
 
   # -- Fetch'n'Format messages
 
-  since_id = REDIS.get("flowdock-digest:#{flow_name}:since_id") || first_message_id
+  since_id = 26326#REDIS.get("flowdock-digest:#{flow_name}:since_id") || first_message_id
 
   while true do
     messages = "https://api.flowdock.com/flows/#{organization}/#{flow_name}/messages?limit=100&event=message&since_id=#{since_id}"
@@ -116,6 +117,7 @@ formatted_messages_by_nicks.each do |user, flow|
     mail_body << "<br>"
 
     messages.each do |message|
+      next if skip_unless_tags_in_message and message[:tags].empty?
       mail_body << message[:content]
     end
 
